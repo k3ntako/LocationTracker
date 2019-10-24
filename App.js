@@ -6,6 +6,7 @@ import {
   View,
   Text,
   StatusBar,
+  Button,
   Dimensions,
 } from 'react-native';
 
@@ -21,15 +22,31 @@ import MapView, {Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 Geolocation.setRNConfiguration({});
 
-import {sendLocation} from './utilities/locationUtils';
+import runUtils from './utilities/runUtils';
+const startRun = runUtils.startRun;
+const recordPoint = runUtils.recordPoint;
 
 class App extends Component {
   constructor(props) {
+    const now = new Date();
+    const dateTime = now.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timezone: 'America/New_York',
+    });
+
     super(props);
     this.state = {
+      run_id: null,
+      isRunning: false,
+      disableToggle: false,
+      name: `Run - ${dateTime}`,
       coordinates: {
-        latitude: 0,
-        longitude: 0,
+        latitude: 40.667545,
+        longitude: -73.969877,
       },
       deltas: {
         latitudeDelta: 0.0922,
@@ -45,6 +62,7 @@ class App extends Component {
     const deltas = {...this.state.deltas};
     deltas.longitudeDelta = deltas.latitudeDelta + width / height;
 
+    // eslint-disable-next-line react/no-did-mount-set-state
     this.setState({deltas}, this.getLocation);
   }
 
@@ -52,19 +70,45 @@ class App extends Component {
     Geolocation.getCurrentPosition(this.getLocationCallback);
   }
 
-  getLocationCallback = position => {
+  getLocationCallback = async position => {
     const coordinates = {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,
     };
 
-    // sendLocation(coordinates);
+    const {name, user_id, isRunninng} = this.state;
 
-    this.setState({coordinates});
+    let run_id = this.state.run_id;
+    if (isRunninng && !run_id) {
+      run_id = startRun({name, coordinates, user_id});
+    } else if (isRunninng) {
+      await recordPoint(coordinates);
+    }
+
+    this.setState({coordinates, run_id, disableToggle: false});
   };
 
+  toggleIsRunning = () => {
+    const isRunning = this.state.isRunning;
+    const callback = isRunning ? this.getLocation : this.enableToggle;
+
+    this.setState(
+      {
+        isRunning: !isRunning,
+        disableToggle: true,
+      },
+      callback,
+    );
+  };
+
+  enableToggle() {
+    setTimeout(() => {
+      this.setState({disableToggle: false});
+    }, 1000);
+  }
+
   render() {
-    const {coordinates} = this.state;
+    const {coordinates, isRunning, disableToggle} = this.state;
     const {latitude, longitude} = coordinates;
     const {latitudeDelta, longitudeDelta} = this.state.deltas;
     const region = {
@@ -74,10 +118,19 @@ class App extends Component {
       longitudeDelta,
     };
 
+    const buttonText = isRunning ? 'Stop Run' : 'Start Run';    
+
     return (
-      <MapView style={styles.map} region={region}>
-        <Marker title={'Current Location'} coordinate={coordinates} />
-      </MapView>
+      <SafeAreaView>
+        <MapView style={styles.map} region={region}>
+          <Marker title={'Current Location'} coordinate={coordinates} />
+        </MapView>
+        <Button
+          title={buttonText}
+          onPress={this.toggleIsRunning}
+          disabled={disableToggle}
+        />
+      </SafeAreaView>
     );
   }
 }
