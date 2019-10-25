@@ -18,12 +18,12 @@ export default {
 
       const {latitude, longitude} = coordinates;
       const response = await fetchUtils.post(
-        '192.168.0.143:3000/api/run/start',
+        'https://location-tracker25.herokuapp.com/api/run/start',
         {
           name,
           latitude,
           longitude,
-          user_id: 'db8b6923-bc67-4e0e-856c-8ca71a3ddb7e',
+          user_id,
           time: Date.now(),
         },
       );
@@ -37,7 +37,7 @@ export default {
   recordPoint: async ({latitude, longitude}) => {
     try {
       const response = await fetchUtils.post(
-        '192.168.0.143:3000/api/run/record',
+        'https://location-tracker25.herokuapp.com/api/run/record',
         {
           latitude,
           longitude,
@@ -51,12 +51,9 @@ export default {
       return err;
     }
   },
-  getRun: async (run_id, afterTime) => {
+  getRun: async (run_id, afterTime = null) => {
     try {
-      const response = await fetchUtils.get('192.168.0.143:3000/api/run', {
-        run_id,
-        afterTime,
-      });
+      const response = await fetchUtils.get('https://location-tracker25.herokuapp.com/api/run/' + run_id);
 
       return response;
     } catch (err) {
