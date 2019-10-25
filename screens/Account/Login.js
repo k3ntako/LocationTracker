@@ -3,6 +3,7 @@ import {
   View,
   StyleSheet,
   TextInput,
+  Text,
   Button,
 } from 'react-native';
 
@@ -16,6 +17,7 @@ class Login extends Component {
     this.state = {
       email: '',
       password: '',
+      errorMessage: '',
     };
 
     this.onEmailChange = this.onChangeText.bind(this, 'email');
@@ -29,9 +31,15 @@ class Login extends Component {
   login = async () => {
     if (this.isValid()) {
       const { email, password } = this.state;
-      const user_id = await login(email, password);
+      const response = await login(email, password);
 
-      this.props.setUserId(user_id);
+      if (response.user_id && !response.error) {
+        this.props.setUserId(response.user_id);
+      }else{
+        this.setState({
+          errorMessage: response.error || 'Unable to login',
+        })
+      }
     }
   }
 
@@ -49,21 +57,29 @@ class Login extends Component {
   }
 
   render() {
-    const { email, password } = this.state;
+    const { email, password, errorMessage } = this.state;
+    const errorText = !!errorMessage && <Text>{errorMessage}</Text>
 
     return (
       <View>
         <TextInput
+          placeholder="Email"
           style={styles.input}
           onChangeText={this.onEmailChange}
           value={email}
-          placeholder="Email"
+          autoCorrect={false}
+          autoCompleteType={'email'}
+          autoCapitalize={'none'}
         />
         <TextInput
+          placeholder="Password"
           style={styles.input}
           onChangeText={this.onPasswordChange}
           value={password}
-          placeholder="Password"
+          autoCompleteType={'password'}
+          autoCorrect={false}
+          secureTextEntry={true}
+          autoCapitalize={'none'}
         />
 
         <Button
@@ -71,6 +87,7 @@ class Login extends Component {
           onPress={this.login}
           disabled={!this.isValid()}
         />
+        {errorText}
       </View>
     );
   }

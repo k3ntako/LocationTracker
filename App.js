@@ -44,7 +44,7 @@ class App extends Component {
   }
 
   setUserId = (user_id) => {
-    this.setState({user_id})
+    this.setState({user_id});
   }
   
   render() {   

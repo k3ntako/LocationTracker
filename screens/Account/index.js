@@ -22,15 +22,16 @@ import Onboarding from './Onboarding';
 class LocatorScreen extends Component {
   constructor({props}) {
     super(props);
-    this.state = {
-    };
+    this.state = {};
   }
 
 
   render() {    
-    const user_id = this.props.screenProps.user_id
+    const props = this.props.screenProps;
+    const user_id = props.user_id;
+
     if(!user_id){
-      return <Onboarding />
+      return <Onboarding setUserId={props.setUserId}/>
     }
 
     return (

@@ -20,6 +20,7 @@ class SignUp extends Component {
       lastName: '',
       password: '',
       passwordConfirmation: '',
+      errorMessage: '',
     };
 
     this.onEmailChange = this.onChangeText.bind(this, 'email');
@@ -35,10 +36,16 @@ class SignUp extends Component {
 
   signUp = async () => {
     if(this.isValid()){
-      const {email, firstName, lastName, password, passwordConfirmation} = this.state;
-      const user_id = await signUp(email, firstName, lastName, password, passwordConfirmation);
+      const {email, firstName, lastName, password} = this.state;
+      const response = await signUp(email, firstName, lastName, password);      
 
-      this.props.setUserId(user_id);
+      if (response.user_id && !response.error) {
+        this.props.setUserId(response.user_id);
+      } else {
+        this.setState({
+          errorMessage: response.error || 'Unable to sign-up',
+        })
+      }
     }
   }
 
@@ -52,43 +59,61 @@ class SignUp extends Component {
       if (!param || !param.trim()) return false;
     }
 
+    if (password !== passwordConfirmation) return false;
+
     return true;
   }
 
   render() {
-    const { email, firstName, lastName, password, passwordConfirmation } = this.state;
+    const { email, firstName, lastName, password, passwordConfirmation, errorMessage } = this.state;
+    const errorText = !!errorMessage && <Text>{errorMessage}</Text>
 
     return (
       <View>
         <TextInput
-          style={styles.input}
-          onChangeText={this.onEmailChange}
-          value={email}
-          placeholder="Email"
-        />
-        <TextInput
+          placeholder="First Name"
           style={styles.input}
           onChangeText={this.onFirstNameChange}
           value={firstName}
-          placeholder="First Name"
+          autoCorrect={false}
+          autoCompleteType={'name'}
         />
         <TextInput
+          placeholder="Last Name"
           style={styles.input}
           onChangeText={this.onLastNameChange}
           value={lastName}
-          placeholder="Last Name"
+          autoCorrect={false}
+          autoCompleteType={'name'}
+          autoCapitalize={'none'}
         />
         <TextInput
+          placeholder="Email"
+          style={styles.input}
+          onChangeText={this.onEmailChange}
+          value={email}
+          autoCorrect={false}
+          autoCompleteType={'email'}
+          autoCapitalize={'none'}
+        />
+        <TextInput
+          placeholder="Password"
           style={styles.input}
           onChangeText={this.onPasswordChange}
           value={password}
-          placeholder="Password"
+          autoCorrect={false}
+          autoCompleteType={'password'}
+          secureTextEntry={true}
+          autoCapitalize={'none'}
         />
         <TextInput
+          placeholder="Password Confirmation"
           style={styles.input}
           onChangeText={this.onPasswordConfirmationChange}
           value={passwordConfirmation}
-          placeholder="Password Confirmation"
+          autoCorrect={false}
+          autoCompleteType={'password'}
+          secureTextEntry={true}
         />
 
         <Button
@@ -96,6 +121,8 @@ class SignUp extends Component {
           onPress={this.signUp}
           disabled={!this.isValid()}
         />
+
+        {errorText}
       </View>
     );
   }
