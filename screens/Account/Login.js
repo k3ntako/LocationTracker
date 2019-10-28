@@ -33,8 +33,8 @@ class Login extends Component {
       const { email, password } = this.state;
       const response = await login(email, password);
 
-      if (response.user_id && !response.error) {
-        this.props.setUserId(response.user_id);
+      if (response.user && !response.error) {        
+        this.props.setUser(response.user);
       }else{
         this.setState({
           errorMessage: response.error || 'Unable to login',

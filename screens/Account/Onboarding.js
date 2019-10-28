@@ -11,7 +11,7 @@ import SignUp from './SignUp'
 
 export default (props) => {
   const [selectSegmentIdx, setSelectSegmentIdx] = useState(0);
-  const content = selectSegmentIdx === 0 ? <Login setUserId={props.setUserId} /> : <SignUp setUserId={props.setUserId} />;
+  const content = selectSegmentIdx === 0 ? <Login setUser={props.setUser} /> : <SignUp setUser={props.setUser} />;
 
   return <SafeAreaView>
     <SegmentedControlIOS

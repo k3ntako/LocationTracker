@@ -28,15 +28,15 @@ class LocatorScreen extends Component {
 
   render() {    
     const props = this.props.screenProps;
-    const user_id = props.user_id;
+    const user = props.user;
 
-    if(!user_id){
-      return <Onboarding setUserId={props.setUserId}/>
+    if(!user){
+      return <Onboarding setUser={props.setUser}/>
     }
 
     return (
       <SafeAreaView>
-        <Text>{user_id}</Text>
+        <Text>{`${user.first_name} ${user.first_name}`}</Text>
       </SafeAreaView>
     );
   }

@@ -39,16 +39,21 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      user_id: null,
+      user: null,
     };
   }
 
-  setUserId = (user_id) => {
-    this.setState({user_id});
+  setUser = (user) => {
+    this.setState({user});
   }
   
   render() {   
-    return <WrappedTabNavigator screenProps={{user_id: this.state.user_id, setUserId: this.setUserId}} />
+    const user = this.state.user;
+    if (!user) {
+      return <AccountScreen screenProps={{ user: this.state.user, setUser: this.setUser }} />
+    }
+
+    return <WrappedTabNavigator screenProps={{user: this.state.user, setUser: this.setUser}} />
   }
 }
 

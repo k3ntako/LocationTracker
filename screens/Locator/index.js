@@ -73,7 +73,8 @@ class LocatorScreen extends Component {
       longitude: position.coords.longitude,
     };
 
-    const { name, user_id, isRunning } = this.state;
+    const { name, isRunning } = this.state;
+    const { user } = this.props.screenProps;    
 
     let run_id = this.state.run_id;
     if (isRunning && !run_id) {

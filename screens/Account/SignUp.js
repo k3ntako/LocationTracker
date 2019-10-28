@@ -39,8 +39,8 @@ class SignUp extends Component {
       const {email, firstName, lastName, password} = this.state;
       const response = await signUp(email, firstName, lastName, password);      
 
-      if (response.user_id && !response.error) {
-        this.props.setUserId(response.user_id);
+      if (response.user && !response.error) {
+        this.props.setUser(response.user);
       } else {
         this.setState({
           errorMessage: response.error || 'Unable to sign-up',
