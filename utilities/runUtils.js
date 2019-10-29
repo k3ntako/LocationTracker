@@ -37,12 +37,11 @@ export default {
   recordPoint: async ({latitude, longitude}, run_id) => {
     try {
       const response = await fetchUtils.post(
-        'https://location-tracker25.herokuapp.com/api/run/record',
+        `https://location-tracker25.herokuapp.com/api/run/${run_id}/record`,
         {
           latitude,
           longitude,
           time: Date.now(),
-          run_id
         },
       );
 
@@ -56,6 +55,17 @@ export default {
     try {
       const lastUpdateQuery = lastUpdate ? `?lastupdate=${lastUpdate}` : ''
       const response = await fetchUtils.get('https://location-tracker25.herokuapp.com/api/run/' + run_id + lastUpdateQuery);
+
+      return response;
+    } catch (err) {
+      console.error(err);
+      return err;
+    }
+  },
+  finishRun: async (run_id) => {
+    try {
+      const url = 'https://location-tracker25.herokuapp.com/api/run/' + run_id + '/finish'
+      const response = await fetchUtils.post(url);
 
       return response;
     } catch (err) {

@@ -7,14 +7,6 @@ import {
   Dimensions,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 Geolocation.setRNConfiguration({});
@@ -22,7 +14,7 @@ Geolocation.setRNConfiguration({});
 import runUtils from '../../utilities/runUtils';
 const startRun = runUtils.startRun;
 const recordPoint = runUtils.recordPoint;
-const getRun = runUtils.getRun;
+const finishRun = runUtils.finishRun;
 
 class LocatorScreen extends Component {
   constructor(props) {
@@ -38,9 +30,8 @@ class LocatorScreen extends Component {
 
     super(props);
     this.state = {
-      run_id: null,
       isRunning: false,
-      disableToggle: false,
+      disableToggle: false,  //disable Start/Stop button to prevent multiple requests to server
       name: `Run - ${dateTime}`,
       coordinates: {
         latitude: 40.667545,
@@ -50,7 +41,10 @@ class LocatorScreen extends Component {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0922,
       },
+      interval: 15, //time between each check in secs
     };
+
+    this.timer = null;
   }
 
   componentDidMount() {
@@ -74,21 +68,26 @@ class LocatorScreen extends Component {
     };
 
     const { name, isRunning } = this.state;
-    const { user } = this.props.screenProps;    
+    const { user, setRunId } = this.props.screenProps;   
+    let run_id =  this.props.screenProps.run_id;
 
-    let run_id = this.state.run_id;
-    if (isRunning && !run_id) {
-      run_id = await startRun(name, coordinates, user_id);
-    } else if (isRunning) {
-      await recordPoint(coordinates);
+    if (isRunning && user && !run_id) {
+      run_id = await startRun(name, coordinates, user.id);
+      this.startRecording();
+    } else if (isRunning && user && run_id) {
+      await recordPoint(coordinates, run_id);
     }
 
-    this.setState({ coordinates, run_id, disableToggle: false });
+    setRunId(run_id);
+    this.setState({ coordinates, disableToggle: false });
   };
 
-  toggleIsRunning = () => {
-    const newIsRunning = !this.state.isRunning;
-    const callback = newIsRunning ? this.getLocation : this.enableToggle;
+  toggleIsRunning = (isRunning = null) => {
+    let newIsRunning = !this.state.isRunning;
+    if (typeof isRunning === 'boolean'){
+      newIsRunning = isRunning;
+    }
+    const callback = newIsRunning ? this.getLocation : this.finishRecording;
 
     this.setState({
       isRunning: newIsRunning,
@@ -96,7 +95,19 @@ class LocatorScreen extends Component {
     }, callback);
   };
 
-  enableToggle() {
+  startRecording = () => {
+    this.timer = setInterval(() => {      
+      this.getLocation();
+    }, this.state.interval * 1000);
+  }
+
+  finishRecording() {
+    const { setRunId, run_id } = this.props.screenProps;
+
+    finishRun(run_id);
+    this.props.screenProps.setRunId(null);
+
+    //enable toggle buttons
     setTimeout(() => {
       this.setState({ disableToggle: false });
     }, 1000);

@@ -7,15 +7,9 @@ import {
   TextInput,
   Button,
   Dimensions,
+  Share,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
 import Onboarding from './Onboarding';
 
@@ -25,31 +19,53 @@ class LocatorScreen extends Component {
     this.state = {};
   }
 
+  share = async () => {
+    try {
+      const run_id = this.props.screenProps.run_id;
+      const link = `https://location-tracker25.herokuapp.com/${run_id}`;
+
+      const result = await Share.share({
+        title: 'Share your run!',
+        message: `I'm currently running! Open the link to track me live!`,
+        url: link
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // TODO: success and error messages
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
 
   render() {    
     const props = this.props.screenProps;
-    const user = props.user;
+    const {user, run_id} = props;
 
     if(!user){
       return <Onboarding setUser={props.setUser}/>
     }
 
+    let shareButton;
+    if (run_id) {
+      shareButton = <Button title={"Share!"} onPress={this.share} />
+    }
+
     return (
       <SafeAreaView>
-        <Text>{`${user.first_name} ${user.first_name}`}</Text>
+        <Text>{`${user.first_name} ${user.last_name}`}</Text>
+        {shareButton}
       </SafeAreaView>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  input: {
-    height: 40, 
-    borderColor: 'gray', 
-    borderWidth: 1,
-    margin: 10,
-    paddingHorizontal: 5
-  },
-});
 
 export default LocatorScreen;

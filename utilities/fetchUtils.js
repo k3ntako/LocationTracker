@@ -1,14 +1,10 @@
 export default {
   get: async url => {
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await fetch(url);
 
     return await response.json();
   },
-  post: async (url, data) => {
+  post: async (url, data = {}) => {
     const response = await fetch(url, {
       method: 'POST',
       headers: {

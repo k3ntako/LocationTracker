@@ -40,20 +40,33 @@ class App extends Component {
     super(props);
     this.state = {
       user: null,
+      run_id: null,
     };
   }
 
   setUser = (user) => {
     this.setState({user});
   }
+
+  setRunId = (run_id) => {
+    this.setState({ run_id });
+  }
   
   render() {   
-    const user = this.state.user;
+    const {user, run_id} = this.state;
+
+    const screenProps = {
+      user, 
+      setUser: this.setUser,
+      run_id,
+      setRunId: this.setRunId,
+    };
+
     if (!user) {
-      return <AccountScreen screenProps={{ user: this.state.user, setUser: this.setUser }} />
+      return <AccountScreen screenProps={screenProps} />
     }
 
-    return <WrappedTabNavigator screenProps={{user: this.state.user, setUser: this.setUser}} />
+    return <WrappedTabNavigator screenProps={screenProps} />
   }
 }
 
