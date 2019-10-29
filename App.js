@@ -1,22 +1,6 @@
 import React, {Component} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  Button,
-  Dimensions,
-} from 'react-native';
+import { AppState } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
 import { createAppContainer } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
@@ -41,8 +25,24 @@ class App extends Component {
     this.state = {
       user: null,
       run_id: null,
+      appState: AppState.currentState,
     };
   }
+
+  componentDidMount() {
+    AppState.addEventListener('change', this._handleAppStateChange);
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
+
+  _handleAppStateChange = (nextAppState) => {
+    console.log("Previous appState:", this.appState);
+    console.log("Next appState:", this.nextAppState);
+    
+    this.setState({ appState: nextAppState });
+  };
 
   setUser = (user) => {
     this.setState({user});
