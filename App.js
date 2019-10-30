@@ -1,18 +1,50 @@
+// React native
 import React, {Component} from 'react';
 import { AppState } from 'react-native';
 
+// Icons
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+const accountIcon = ({ focused, horizontal, tintColor }) => {
+  return <FontAwesome5 name={'user-circle'} color={tintColor} size={20}/>;
+}
 
+const locatorIcon = ({ focused, horizontal, tintColor }) => {
+  return <FontAwesome5 name={'map-marker-alt'} color={tintColor} size={20}/>;
+}
+
+// Navigation and Screens
 import { createAppContainer } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
-
-
 import LocatorScreen from './screens/Locator';
 import AccountScreen from './screens/Account';
 
 const TabNavigator = createBottomTabNavigator({
-  Locator: LocatorScreen,
-  Account: AccountScreen,
+  Locator: {
+    screen: LocatorScreen,
+    navigationOptions: {
+      tabBarLabel: "Map",
+      tabBarIcon: locatorIcon,
+      tabBarOptions: {
+        activeTintColor: '#e91e63',
+        showLabel: false,
+        showIcon: true,
+    },
+  },
+  },
+  Account: {
+    screen: AccountScreen,
+    navigationOptions: {
+      tabBarLabel: "Account",
+      tabBarIcon: accountIcon,
+      tabBarOptions: {
+        showLabel: false,
+        showIcon: true,
+        activeTintColor: '#e91e63',
+      },
+    },
+  },
 });
+
 
 
 
