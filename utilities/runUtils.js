@@ -6,11 +6,33 @@ const validateCoordinates = coordinates => {
 };
 
 export default {
+  createRun: async (user_id, name) => {
+    try {
+      if (!name || !name.trim()) {
+        throw new Error('Invalid name');
+      } else if (!user_id) {
+        throw new Error('Invalid user ID');
+      }
+
+      const response = await fetchUtils.post(
+        'https://location-tracker25.herokuapp.com/api/run/create',
+        {
+          name,
+          user_id,
+        },
+      );
+
+      return response.run_id;
+    } catch (err) {
+      console.error(err);
+      return err;
+    }
+  },
   startRun: async (name, coordinates, user_id) => {
     try {
       if (!validateCoordinates) {
         throw new Error('Invalid coordinates');
-      } else if (!name.trim()) {
+      } else if (!name || !name.trim()) {
         throw new Error('Invalid name');
       } else if (!user_id) {
         throw new Error('Invalid user ID');

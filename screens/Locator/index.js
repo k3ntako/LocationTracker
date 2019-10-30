@@ -5,11 +5,14 @@ import {
   View,
   Button,
   Dimensions,
+  Text,
 } from 'react-native';
 
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 Geolocation.setRNConfiguration({});
+
+import CreateRun from './CreateRun';
 
 import runUtils from '../../utilities/runUtils';
 const startRun = runUtils.startRun;
@@ -32,7 +35,7 @@ class LocatorScreen extends Component {
     this.state = {
       isRunning: false,
       disableToggle: false,  //disable Start/Stop button to prevent multiple requests to server
-      name: `Run - ${dateTime}`,
+      runName: `Run - ${dateTime}`,
       coordinates: {
         latitude: 40.667545,
         longitude: -73.969877,
@@ -45,6 +48,10 @@ class LocatorScreen extends Component {
     };
 
     this.timer = null;
+  }
+
+  onRunNameChange = (text) => {
+    this.setState({ name: text });
   }
 
   componentDidMount() {
@@ -69,7 +76,7 @@ class LocatorScreen extends Component {
 
     const { name, isRunning } = this.state;
     const { user, setRunId } = this.props.screenProps;   
-    let run_id =  this.props.screenProps.run_id;
+    let run_id = this.props.screenProps.run_id;
 
     if (isRunning && user && !run_id) {
       run_id = await startRun(name, coordinates, user.id);
@@ -114,7 +121,17 @@ class LocatorScreen extends Component {
   }
 
   render() {
-    const { coordinates, isRunning, disableToggle } = this.state;
+    const { run_id, setRunId, user} = this.props.screenProps;
+    const { coordinates, isRunning, disableToggle, runName } = this.state;
+
+    if (!run_id) {
+      return <CreateRun 
+        user_id={user.id}
+        setRunId={setRunId} 
+        runName={runName} 
+        onRunNameChange={this.onRunNameChange} />
+    }
+
     const { latitude, longitude } = coordinates;
     const { latitudeDelta, longitudeDelta } = this.state.deltas;
     const region = {
@@ -131,6 +148,7 @@ class LocatorScreen extends Component {
         <MapView style={styles.map} region={region}>
           <Marker title={'Current Location'} coordinate={coordinates} />
         </MapView>
+        <Text style={styles.runName}>{runName}</Text>
         <Button
           title={buttonText}
           onPress={this.toggleIsRunning}
@@ -146,6 +164,10 @@ const styles = StyleSheet.create({
     height: '80%',
     marginVertical: 50,
   },
+  runName: {
+    width: '100%',
+    textAlign: 'center',
+  }
 });
 
 export default LocatorScreen;

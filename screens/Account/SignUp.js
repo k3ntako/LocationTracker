@@ -134,7 +134,8 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     margin: 10,
-    paddingHorizontal: 5
+    paddingHorizontal: 5,
+    color: 'black',
   },
 });
 
