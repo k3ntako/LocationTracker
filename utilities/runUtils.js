@@ -95,4 +95,18 @@ export default {
       return err;
     }
   },
+  config: (BackgroundGeolocation) =>  {
+    return {
+      desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+      distanceFilter: 10,
+      stopTimeout: 1,
+      debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
+      logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
+      stopOnTerminate: false,   // <-- Allow the background-service to continue tracking when user closes the app.
+      startOnBoot: false,
+      url: '',
+      batchSync: false,
+      autoSync: true,
+    }
+  }
 };

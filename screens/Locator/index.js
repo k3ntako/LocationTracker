@@ -8,9 +8,11 @@ import {
   Text,
 } from 'react-native';
 
+import BackgroundGeolocation from "react-native-background-geolocation";
+
 import MapView, { Marker } from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
-Geolocation.setRNConfiguration({});
+// import Geolocation from '@react-native-community/geolocation';
+// Geolocation.setRNConfiguration({});
 
 import CreateRun from './CreateRun';
 
@@ -18,6 +20,7 @@ import runUtils from '../../utilities/runUtils';
 const startRun = runUtils.startRun;
 const recordPoint = runUtils.recordPoint;
 const finishRun = runUtils.finishRun;
+const config = runUtils.config;
 
 class LocatorScreen extends Component {
   constructor(props) {
@@ -54,47 +57,70 @@ class LocatorScreen extends Component {
     this.setState({ name: text });
   }
 
-  componentDidMount() {
+  componentDidMount() { 
     const window = Dimensions.get('window');
     const { width, height } = window;
 
     const deltas = { ...this.state.deltas };
     deltas.longitudeDelta = deltas.latitudeDelta + width / height;
 
-    this.setState({ deltas }, this.getLocation);
+    this.setState({ deltas }, this.getLocation); 
+
+    BackgroundGeolocation.onLocation(this.onLocation, this.onError);
+
+    BackgroundGeolocation.ready(config(BackgroundGeolocation), this.onReady);
   }
 
-  getLocation() {
-    Geolocation.getCurrentPosition(this.getLocationCallback);
+  onReady = (state) => {
+    console.log('state', state.url);
+    console.log("- BackgroundGeolocation is configured and ready: ", state.enabled);
   }
 
-  getLocationCallback = async position => {
-    const coordinates = {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-    };
+  // setRunId  = (run_id) => {
+  //   BackgroundGeolocation.setConfig({
+  //     url: `https://location-tracker25.herokuapp.com/api/run/${run_id}/record`,
+  //   }).then((state) => {
+  //     console.log('run id set to: ', state);
+  //   })
+  // }
 
-    const { name, isRunning } = this.state;
-    const { user, setRunId } = this.props.screenProps;   
-    let run_id = this.props.screenProps.run_id;
+  componentWillUnmount() {
+    BackgroundGeolocation.removeListeners();
+  }
 
-    if (isRunning && user && !run_id) {
-      run_id = await startRun(name, coordinates, user.id);
-      this.startRecording();
-    } else if (isRunning && user && run_id) {
-      await recordPoint(coordinates, run_id);
-    }
+  onLocation(location) {
+    console.log('[location] -', location);
+  }
 
-    setRunId(run_id);
-    this.setState({ coordinates, disableToggle: false });
-  };
+  // getLocation() {
+  //   Geolocation.getCurrentPosition(this.getLocationCallback);
+  // }
 
-  toggleIsRunning = (isRunning = null) => {
+  // getLocationCallback = async position => {
+  //   const coordinates = {
+  //     latitude: position.coords.latitude,
+  //     longitude: position.coords.longitude,
+  //   };
+
+  //   const { name, isRunning } = this.state;
+  //   const { user, setRunId } = this.props.screenProps;   
+  //   let run_id = this.props.screenProps.run_id;
+
+  //   if (isRunning && user && !run_id) {
+  //     run_id = await startRun(name, coordinates, user.id);
+  //     this.startRecording();
+  //   } else if (isRunning && user && run_id) {
+  //     await recordPoint(coordinates, run_id);
+  //   }
+
+  //   setRunId(run_id);
+  //   this.setState({ coordinates, disableToggle: false });
+  // };
+
+  toggleIsRunning = () => {
     let newIsRunning = !this.state.isRunning;
-    if (typeof isRunning === 'boolean'){
-      newIsRunning = isRunning;
-    }
-    const callback = newIsRunning ? this.getLocation : this.finishRecording;
+
+    const callback = newIsRunning ? this.startRecording : this.finishRecording;
 
     this.setState({
       isRunning: newIsRunning,
@@ -102,14 +128,30 @@ class LocatorScreen extends Component {
     }, callback);
   };
 
-  startRecording = () => {
-    this.timer = setInterval(() => {      
-      this.getLocation();
-    }, this.state.interval * 1000);
+  startRecording = async () => {
+    const {run_id} = this.props.screenProps;
+    if (!run_id) {
+      throw new Error('No run ID');
+    }
+
+    BackgroundGeolocation.setConfig({
+      url: `https://location-tracker25.herokuapp.com/api/run/${run_id}/record`,
+    }).then(state => {
+      if (!state.url || !state.url.includes(run_id)){
+        throw new Error('Invalid run ID')
+      }
+
+      BackgroundGeolocation.start().then((state) => {
+        console.log('[start] success - ', state.enable);
+        this.setState({ disableToggle: false });
+      });
+    });
   }
 
   finishRecording() {
     const { setRunId, run_id } = this.props.screenProps;
+
+    BackgroundGeolocation.stop();
 
     finishRun(run_id);
     this.props.screenProps.setRunId(null);
