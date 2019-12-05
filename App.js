@@ -28,8 +28,8 @@ const TabNavigator = createBottomTabNavigator({
         activeTintColor: '#e91e63',
         showLabel: false,
         showIcon: true,
+      },
     },
-  },
   },
   Account: {
     screen: AccountScreen,
@@ -59,9 +59,7 @@ class App extends Component {
       run_id: null,
       appState: AppState.currentState,
     };
-  }
 
-  componentDidMount() {
     AppState.addEventListener('change', this._handleAppStateChange);
   }
 
@@ -70,8 +68,8 @@ class App extends Component {
   }
 
   _handleAppStateChange = (nextAppState) => {
-    console.log("Previous appState:", this.appState);
-    console.log("Next appState:", this.nextAppState);
+    console.log("Previous appState:", this.state.appState);
+    console.log("Next appState:", nextAppState);
     
     this.setState({ appState: nextAppState });
   };

@@ -46,7 +46,7 @@ class LocatorScreen extends Component {
   }
 
 
-  render() {    
+  render() {
     const props = this.props.screenProps;
     const {user, run_id} = props;
 
@@ -60,12 +60,27 @@ class LocatorScreen extends Component {
     }
 
     return (
-      <SafeAreaView>
-        <Text>{`${user.first_name} ${user.last_name}`}</Text>
+      <SafeAreaView style={styles.account}>
+        <Text style={styles.name}>{`${user.first_name} ${user.last_name}`}</Text>
+        <Text style={styles.id}>User ID: {user.id}</Text>
+        <Text style={styles.id}>Run ID: {run_id}</Text>
         {shareButton}
       </SafeAreaView>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  account: {
+    marginVertical: 75,
+  },
+  name: {
+    textAlign: 'center',
+    fontSize: 36,
+  },
+  id: {
+    textAlign: 'center',
+  },
+});
 
 export default LocatorScreen;

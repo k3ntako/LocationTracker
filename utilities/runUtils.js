@@ -106,7 +106,7 @@ export default {
       startOnBoot: false,
       url: '',
       batchSync: false,
-      autoSync: true,
+      autoSync: false,
     }
   }
 };
